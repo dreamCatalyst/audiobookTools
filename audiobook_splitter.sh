@@ -16,7 +16,7 @@
 # PERFORMANCE OF THIS SOFTWARE.
 
 SCRIPTNAME=$(basename "$0")
-SCRIPTVERSION="0.1.0"
+SCRIPTVERSION="0.2.0"
 
 # -------------------------------------------------------- Variables for colorizing output
 
@@ -93,7 +93,7 @@ Usage: $SCRIPTNAME [options] FILENAME
   --meta-genre string
   --meta-publisher string
   --meta-comment string
-  These settings override the values provided (if any) in the source file.
+  These settings override the metadata values provided (if any) by the source file.
 
 EOS
 
