@@ -16,7 +16,7 @@
 # PERFORMANCE OF THIS SOFTWARE.
 
 SCRIPTNAME=$(basename "$0")
-
+SCRIPTVERSION="0.1.0"
 
 # -------------------------------------------------------- Variables for colorizing output
 
@@ -55,6 +55,7 @@ print_error_and_exit() {
 
 usage() {
     cat <<EOS
+audiobook_splitter.sh - version $SCRIPTVERSION - Copyright (c) 2020 Jonathan Maasland
 
 Usage: $SCRIPTNAME [options] FILENAME
   -h|--help                    Print this help message
