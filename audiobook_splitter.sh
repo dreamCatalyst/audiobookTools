@@ -32,14 +32,13 @@ NO_COLOR='\033[0m'
 # -------------------------------------------------------- Generic functions
 
 print_verbose() {
-    if [ $ENABLE_DEBUG = true ] || [ $VERBOSE_OPT = true ]; then
+    if $ENABLE_DEBUG || $VERBOSE_OPT; then
         echo -e "${COLOR_YELLOW}$1${NO_COLOR}"
     fi
 }
 
-ENABLE_DEBUG=true  # temp. set to true for debugging
 print_debug() {
-    if [ $ENABLE_DEBUG = true ]; then
+    if $ENABLE_DEBUG; then
         echo -e "${COLOR_CYAN}$1${NO_COLOR}"
     fi
 }
@@ -106,6 +105,7 @@ EOS
 
 # -------------------------------------------------------- Command line option parsing
 
+ENABLE_DEBUG=true  # temp. set to true for debugging
 VERBOSE_OPT=false
 OUTPUT_DIRECTORY=""
 SEGMENT_LENGTH=1800
@@ -145,6 +145,11 @@ do
     -v|--verbose)
         print_debug "Setting verbose to true"
         VERBOSE_OPT=true
+        shift
+        ;;
+    --debug)
+        print_debug "Setting ENABLE_DEBUG to true"
+        ENABLE_DEBUG=true
         shift
         ;;
     -d|--directory)
