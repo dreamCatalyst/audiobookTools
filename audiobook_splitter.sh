@@ -125,12 +125,8 @@ TITLE_SUFFIX=""
 COPY_METADATA=true
 COPY_COVERART=true
 COVERART_FILE=""
-META_TITLE=""
-META_ARTIST=""
-META_ALBUM=""
-META_GENRE=""
-META_PUBLISHER=""
-META_COMMENT=""
+declare -A METADATA
+METADATA=([TITLE]="" [ARTIST]="" [ALBUM]="" [GENRE]="" [PUBLISHER]="" [COMMENT]="")
 
 INPUTFILENAME=""
 
@@ -228,33 +224,33 @@ do
         shift
         ;;
     --meta-title)
-        print_debug "Setting META_TITLE to '$2'"
-        META_TITLE="$2"
+        print_debug "Setting METADATA[TITLE] to '$2'"
+        METADATA[TITLE]="$2"
         shift; shift
         ;;
     --meta-artist)
-        print_debug "Setting META_ARTIST to '$2'"
-        META_ARTIST="$2"
+        print_debug "Setting METADATA[ARTIST] to '$2'"
+        METADATA[ARTIST]="$2"
         shift; shift
         ;;
     --meta-album)
-        print_debug "Setting META_ALBUM to '$2'"
-        META_ALBUM="$2"
+        print_debug "Setting METADATA[ALBUM] to '$2'"
+        METADATA[ALBUM]="$2"
         shift; shift
         ;;
     --meta-genre)
-        print_debug "Setting META_GENRE to '$2'"
-        META_GENRE="$2"
+        print_debug "Setting METADATA[GENRE] to '$2'"
+        METADATA[GENRE]="$2"
         shift; shift
         ;;
     --meta-publisher)
-        print_debug "Setting META_PUBLISHER to '$2'"
-        META_PUBLISHER="$2"
+        print_debug "Setting METADATA[PUBLISHER] to '$2'"
+        METADATA[PUBLISHER]="$2"
         shift; shift
         ;;
     --meta-comment)
-        print_debug "Setting META_COMMENT to '$2'"
-        META_COMMENT="$2"
+        print_debug "Setting METADATA[COMMENT] to '$2'"
+        METADATA[COMMENT]="$2"
         shift; shift
         ;;
     *)
@@ -310,12 +306,10 @@ print_debug "SUFFIX_STRING:     '$SUFFIX_STRING'"
 print_debug "COPY_METADATA:     '$COPY_METADATA"
 print_debug "COPY_COVERART:     '$COPY_COVERART'"
 print_debug "COVERART_FILE:     '$COVERART_FILE'"
-print_debug "META_TITLE:        '$META_TITLE'"
-print_debug "META_ARTIST:       '$META_ARTIST'"
-print_debug "META_ALBUM:        '$META_ALBUM'"
-print_debug "META_GENRE:        '$META_GENRE'"
-print_debug "META_PUBLISHER:    '$META_PUBLISHER"
-print_debug "META_COMMENT:      '$META_COMMENT'"
+for key in ${!METADATA[@]}; do
+    STR=$(printf "%-18s '%s'\n" "$key" "${METADATA[${key}]}")
+    print_debug "$STR"
+done
 print_debug "-----------------------------------"
 
 
@@ -386,13 +380,13 @@ for SEGMENT in $(seq 1 $NUM_SEGMENTS); do
     if [ !$COPY_METADATA ]; then
         FFMPEG_CMD+="-map_metadata -1 "
     fi
-    # set codec and bitrate
-    FFMPEG_CMD+="-acodec $CODEC -b:a $BITRATE "
     # set metadata for coverart
     if [ -n "$COVERART_FILE" ] || $COPY_COVERART; then
         FFMPEG_CMD+="-metadata:s:v title=\"Album cover\" -metadata:s:v comment=\"Cover (front)\" "
     fi
     # set the metadata fields
+    # set codec and bitrate
+    FFMPEG_CMD+="-acodec $CODEC -b:a $BITRATE "
     
     # segment filename
     
