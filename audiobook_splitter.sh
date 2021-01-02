@@ -396,4 +396,4 @@ done
 
 # ------------------------------------------------------ Cleanup
 
-#rm $PROBE_OUTPUT_FN
+rm $PROBE_OUTPUT_FN
