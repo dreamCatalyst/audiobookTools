@@ -298,11 +298,24 @@ print_debug "Printing variables after validation"
 print_debug "-----------------------------------"
 print_debug "INPUTFILENAME:     '$INPUTFILENAME'"
 print_debug "OUTPUT_DIRECTORY:  '$OUTPUT_DIRECTORY'"
-print_debug "SEGMENT_LENGTH:    $SEGMENT_LENGTH"
-print_debug "GRACE_LENGTH:      $GRACE_LENGTH"
+print_debug "SEGMENT_LENGTH:    '$SEGMENT_LENGTH'"
+print_debug "GRACE_LENGTH:      '$GRACE_LENGTH'"
 print_debug "SEGMENT_EXTENSION: '$SEGMENT_EXTENSION'"
 print_debug "CODEC:             '$CODEC'"
 print_debug "BITRATE:           '$BITRATE'"
+print_debug "PREFIX_STRING:     '$PREFIX_STRING'"
+print_debug "SEGMENT_PREFIX:    '$SEGMENT_PREFIX'"
+print_debug "TITLE_PREFIX:      '$TITLE_PREFIX'"
+print_debug "SUFFIX_STRING:     '$SUFFIX_STRING'"
+print_debug "COPY_METADATA:     '$COPY_METADATA"
+print_debug "COPY_COVERART:     '$COPY_COVERART'"
+print_debug "COVERART_FILE:     '$COVERART_FILE'"
+print_debug "META_TITLE:        '$META_TITLE'"
+print_debug "META_ARTIST:       '$META_ARTIST'"
+print_debug "META_ALBUM:        '$META_ALBUM'"
+print_debug "META_GENRE:        '$META_GENRE'"
+print_debug "META_PUBLISHER:    '$META_PUBLISHER"
+print_debug "META_COMMENT:      '$META_COMMENT'"
 print_debug "-----------------------------------"
 
 
@@ -311,7 +324,7 @@ print_debug "-----------------------------------"
 REQUIRED_PROGRAMS=("ffprobe" "ffmpeg" "bc")
 for p in "${REQUIRED_PROGRAMS[@]}"; do
     if ! which "$p" &>/dev/null; then
-        usage "Required program '$p' not found. exiting"  # "  (added because of Kate bash highlighting bug )
+        usage "Required program '$p' not found. exiting"
     fi
 done
 
@@ -353,21 +366,37 @@ print_verbose "Number of segments to create: $NUM_SEGMENTS"
 
 # build the ffmpeg command and execute it
 for SEGMENT in $(seq 1 $NUM_SEGMENTS); do
-  FFMPEG_CMD="ffmpeg "
-  if [ $SEGMENT -gt 1 ]; then  # for the first segment -ss is not needed
-      SEGMENT_START=$(( (SEGMENT-1) * SEGMENT_LENGTH ))
-      FFMPEG_CMD+="-ss $SEGMENT_START "
-  fi
-  if [ $SEGMENT != $NUM_SEGMENTS ]; then  # for the last segment -to is not needed
-      SEGMENT_END=$(( SEGMENT * SEGMENT_LENGTH ))
-      FFMPEG_CMD+="-to $SEGMENT_END "
-  fi
-  # regular metadata
-  # title metadata
-  # cover art
-  # segment filename
-  
-  print_debug "constructed command: '$FFMPEG_CMD'"
+    FFMPEG_CMD="ffmpeg "
+    # create the start and end segment options
+    if [ $SEGMENT -gt 1 ]; then  # for the first segment -ss is not needed
+        SEGMENT_START=$(( (SEGMENT-1) * SEGMENT_LENGTH ))
+        FFMPEG_CMD+="-ss $SEGMENT_START "
+    fi
+    if [ $SEGMENT != $NUM_SEGMENTS ]; then  # for the last segment -to is not needed
+        SEGMENT_END=$(( SEGMENT * SEGMENT_LENGTH ))
+        FFMPEG_CMD+="-to $SEGMENT_END "
+    fi
+    # add the inputs and mapping if coverart needs to change
+    FFMPEG_CMD+="-i \"$INPUTFILENAME\" "
+    if [ -n "$COVERART_FILE" ]; then
+        FFMPEG_CMD+="-i \"$COVERART_FILE\" -map 0 -map -0:v? "
+    elif [ !$COPY_COVERART ]; then
+        FFMPEG_CMD+="-map 0 -map -0:v? "
+    fi
+    if [ !$COPY_METADATA ]; then
+        FFMPEG_CMD+="-map_metadata -1 "
+    fi
+    # set codec and bitrate
+    FFMPEG_CMD+="-acodec $CODEC -b:a $BITRATE "
+    # set metadata for coverart
+    if [ -n "$COVERART_FILE" ] || $COPY_COVERART; then
+        FFMPEG_CMD+="-metadata:s:v title=\"Album cover\" -metadata:s:v comment=\"Cover (front)\" "
+    fi
+    # set the metadata fields
+    
+    # segment filename
+    
+    print_debug "constructed command: '$FFMPEG_CMD'"
 done
 
 
