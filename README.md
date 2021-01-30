@@ -37,7 +37,9 @@ to ffmpeg.
 
 ## Some examples
 
-Suppose we have an audiobook called source.mp3 and it's a three hour long book. Executing:
+Suppose we have an audiobook called source.mp3 and it's a three hour long book. Executing
+audiobook_splitter.sh on this file with no options would result in six new files being created.
+Each of these files would be 30 minutes long:
 
     audiobook_splitter.sh source.mp3
     ...
@@ -48,9 +50,9 @@ Suppose we have an audiobook called source.mp3 and it's a three hour long book. 
     ...
     source - part 06.mp3
 
-would result in six new files being created: source - part 01.mp3, source - part 02.mp3 all the way through
-to source - part 06.mp3. All these files would be 30 minutes long and be encoded in a bitrate of 128k.
-
+If you want the parts to be 1 hour long instead of 30 minutes you can use the **-l** option and provide
+the length of each segment in seconds:
+    
     audiobook_splitter.sh -l 3600 source.mp3
     ...
     > ls
@@ -59,11 +61,11 @@ to source - part 06.mp3. All these files would be 30 minutes long and be encoded
     source - part 02.mp3
     source - part 03.mp3
 
-As you can see this command would create three new files: source-part01.mp3, source-part02.mp3 and source-part03.mp3.
-The *-l 3600* option indicates that each part should be 3600 seconds long (1 hour).
+As you can see this command would create three new files. The **-l 3600** option indicates that each part should be 3600 seconds long.
+(1 hour = 60 minutes, 1 minute = 60 seconds, 1 hour = 60*60 seconds = 3600 seconds)
 
 If you want to place the newly created segments in a directory of their own you can do that by using
-the *-d directory* option:
+the **-d directory** option:
 
     audiobook_splitter.sh -d parts source.mp3
     ...
@@ -94,7 +96,7 @@ For example:
       +----> prefix
 
 Suppose you live in Germany and you don't want **" - part 01"** but **" - teil 01"** instead.
-You can use the *--suffix* option to provide your own suffix. As noted below in the usage section
+You can use the **--suffix** option to provide your own suffix. As noted below in the usage section
 you can use the printf format for placeholders:
 
     audiobook_splitter.sh --suffix " - teil %2d" source.mp3
@@ -108,7 +110,7 @@ you can use the printf format for placeholders:
 As you can see, the "%2d" part of the suffix string gets replaced with the appropriate number.
 
 Now suppose you have source.mp3 but it actually contains the audiobook version of "Alice in Wonderland".
-You can then use the *--prefix* option to change the prefix of the generated files:
+You can then use the **--prefix** option to change the prefix of the generated files:
 
     audiobook_splitter.sh --prefix "Alice in Wonderland" source.mp3
     ...
