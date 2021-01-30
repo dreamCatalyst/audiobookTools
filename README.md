@@ -99,7 +99,7 @@ Suppose you live in Germany and you don't want **" - part 01"** but **" - teil 0
 You can use the **--suffix** option to provide your own suffix. As noted below in the usage section
 you can use the printf format for placeholders:
 
-    audiobook_splitter.sh --suffix " - teil %2d" source.mp3
+    audiobook_splitter.sh --suffix " - teil %02d" source.mp3
     ...
     > ls
     source.mp3
@@ -144,7 +144,7 @@ You can then use the **--prefix** option to change the prefix of the generated f
                                  title metadata. Default value is " - part %02d". The "%02d" is the
                                  placeholder for the number of the segment. It's possible to use two
                                  placeholders. The second one will then be used for the total number of
-                                 segments. For example using " - part %2d / %2d" would result in a
+                                 segments. For example using " - part %02d / %02d" would result in a
                                  suffix that would look like " - part 22 / 54".
                                  See printf(1) for more information on formatting.
     --segment-suffix string      Use a specific segment filename suffix. Overrides --suffix

@@ -75,7 +75,7 @@ Usage: $SCRIPTNAME [options] FILENAME
                                title metadata. Default value is " - part %02d". The "%02d" is the
                                placeholder for the number of the segment. It's possible to use two
                                placeholders. The second one will then be used for the total number of
-                               segments. For example using " - part %2d / %2d" would result in a
+                               segments. For example using " - part %02d / %02d" would result in a
                                suffix that would look like " - part 22 / 54".
                                See printf(1) for more information on formatting.
   --segment-suffix string      Use a specific segment filename suffix. Overrides --suffix
@@ -323,9 +323,8 @@ for p in "${REQUIRED_PROGRAMS[@]}"; do
 done
 
 
-# ------------------------------------------------------ Commence heavy lifting
+# ------------------------------------------------------ Retrieve the duration of the file in hours, minutes and seconds
 
-# Retrieve the duration of the file in hours, minutes and seconds
 PROBE_OUTPUT_FN="probe_output.txt"
 if [ -e $PROBE_OUTPUT_FN ]; then
     print_debug "$PROBE_OUTPUT_FN already exists. Removing"
@@ -348,7 +347,7 @@ LEN_S=$(echo $DURATION_STRING| cut -f3 -d:)
 LEN_S=$(( $(echo $LEN_S | cut -f1 -d.) + 1 ))
 print_debug "Duration string separated: hours=$LEN_H minutes=$LEN_M seconds=$LEN_S"
 
-TOTAL_LEN_S=$((LEN_H*3600 + LEN_M*60 + LEN_S))
+TOTAL_LEN_S=$((10#$LEN_H*3600 + 10#$LEN_M*60 + 10#$LEN_S))
 
 # calculate the number of segments we need to create
 NUM_SEGMENTS=$((TOTAL_LEN_S / SEGMENT_LENGTH))
@@ -358,8 +357,14 @@ if [ $REMAINDER -gt $GRACE_LENGTH ]; then
 fi
 print_verbose "Number of segments to create: $NUM_SEGMENTS"
 
-# build the ffmpeg command and execute it
+
+# ------------------------------------------------------ Build the ffmpeg command and execute it
+
+SOURCE_FILE_NO_EXT=$(basename "$(echo $INPUTFILENAME | rev | cut -f 2- -d '.' | rev)")
+ESCAPED_INPUT_FILENAME=$(printf '%q' "$INPUTFILENAME")
+OLD_IFS="$IFS"
 for SEGMENT in $(seq 1 $NUM_SEGMENTS); do
+    IFS=$'\n'
     FFMPEG_CMD="ffmpeg "
     # create the start and end segment options
     if [ $SEGMENT -gt 1 ]; then  # for the first segment -ss is not needed
@@ -371,6 +376,7 @@ for SEGMENT in $(seq 1 $NUM_SEGMENTS); do
         FFMPEG_CMD+="-to $SEGMENT_END "
     fi
     # add the inputs and mapping if coverart needs to change
+    #FFMPEG_CMD+="-i \"$ESCAPED_INPUT_FILENAME\" "
     FFMPEG_CMD+="-i \"$INPUTFILENAME\" "
     if [ -n "$COVERART_FILE" ]; then
         FFMPEG_CMD+="-i \"$COVERART_FILE\" -map 0 -map -0:v? "
@@ -384,13 +390,35 @@ for SEGMENT in $(seq 1 $NUM_SEGMENTS); do
     if [ -n "$COVERART_FILE" ] || $COPY_COVERART; then
         FFMPEG_CMD+="-metadata:s:v title=\"Album cover\" -metadata:s:v comment=\"Cover (front)\" "
     fi
-    # set the metadata fields
+    # TODO: set the metadata fields
+    
     # set codec and bitrate
     FFMPEG_CMD+="-acodec $CODEC -b:a $BITRATE "
     
-    # segment filename
+    # construct the segment filename
+    SEGMENT_FILENAME=""
+    # prefix
+    if [ -n "$SEGMENT_PREFIX" ]; then
+        SEGMENT_FILENAME="$SEGMENT_PREFIX"
+    elif [ -n "$PREFIX_STRING" ]; then
+        SEGMENT_FILENAME="$PREFIX_STRING"
+    else
+        SEGMENT_FILENAME="$SOURCE_FILE_NO_EXT"
+    fi
+    # suffix
+    if [ -n "$SEGMENT_SUFFIX" ]; then
+        SEGMENT_FILENAME+="$SEGMENT_SUFFIX"
+    else
+        SEGMENT_FILENAME+="$SUFFIX_STRING"
+    fi
+    SEGMENT_FILENAME+=".$SEGMENT_EXTENSION"
+    SEGMENT_FILENAME=$(echo "$SEGMENT_FILENAME" | awk "{ printf \$0, $SEGMENT, $NUM_SEGMENTS }")
+    ESCAPED_SEGMENT_FILENAME=$(printf '%q' "$SEGMENT_FILENAME")
     
+    #FFMPEG_CMD+="$ESCAPED_SEGMENT_FILENAME"
+    FFMPEG_CMD+="\"$SEGMENT_FILENAME\""
     print_debug "constructed command: '$FFMPEG_CMD'"
+    eval $FFMPEG_CMD
 done
 
 
