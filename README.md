@@ -17,3 +17,84 @@ Tools to convert large audiobooks into smaller segments.
     ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ---
+
+## Introduction
+
+Audiobooktools was created to simplify the process of splitting up long audio files into
+smaller and shorter files. As someone who listens to audiobooks before sleep I found it
+tedious to have to issue shell commands so that that 9 hour book I was listening to would
+pause after 45 minutes. The solution is simple: just split the book up into smaller parts
+of 30 minutes. The added benefit is that it's obviously much simpler to keep track of where
+in the audiobook you left off. No more searching, seeking and listening to parts you already
+heard. Just start at the part where you left off. Maybe in the specific part you'll do some
+fastforwarding but it's much more precise.
+
+After several times of manually splitting audiobooks with ffmpeg I decided to create this little
+tool to make my life easier. It is dependent on ffmpeg and is nothing more than a simple
+wrapper but should provide the user the freedom to forget about how to apply the proper options
+to ffmpeg.
+
+
+## Some examples
+
+Suppose we have an audiobook called source.mp3 and it's a three hour long book. Executing:
+
+    audiobook_splitter.sh source.mp3
+
+would result in six new files being created: source-part1.mp3, source-part2.mp3 all the way through
+to source-part6.mp3. All these files would be 30 minutes long and be encoded in a bitrate of 128k.
+
+    audiobook_splitter.sh -l 3600 source.mp3
+
+This command would create three new files: source-part1.mp3, source-part2.mp3 and source-part3.mp3.
+The *-l 3600* option indicates that each part should be 3600 seconds long (1 hour).
+
+If you want to place the newly created segments in a directory of their own you can do that by using
+the *-d directory* option:
+
+    audiobook_splitter.sh -d parts source.mp3
+    
+This would create the same six, 30 minute segments and put them in the *parts* subdirectory.
+
+
+## Usage
+
+    audiobook_splitter.sh - version 0.2.0 - Copyright (c) 2020 Jonathan Maasland
+
+    Usage: audiobook_splitter.sh [options] FILENAME
+    -h|--help                    Print this help message
+    -v|--verbose                 Enable verbose messages
+    -d|--directory directory     Place output segments in specified directory
+    -l|--length seconds          Length each segment should be in seconds (default 1800 = 30 minutes)
+    -g|--grace seconds           If the potential last segment is shorter than the grace period then
+                                 do not create the last segment but instead lengthen the last one.
+                                 (default 600 = 10 minutes, set to 0 to disable)
+    -b|--bitrate num             Bitrate to use for encoding (default 128k)
+    -c|--codec c                 Audio codec to use (default libmp3lame)
+    -e|--ext e                   File extension to use for the output segments (default mp3)
+    --prefix string              Use the provided string as a default prefix for segment filenames and
+                                 title metadata. Default value is to use the name of the source file
+    --segment-prefix string      Use the specified string as a prefix for segment filenames. Overrides --prefix
+    --title-prefix string        Use a specific title metadata string prefix. Overrides --prefix
+    --suffix string              Use the provided string as a default suffix for segment filenames and
+                                 title metadata. Default value is " - part %02d". The "%02d" is the
+                                 placeholder for the number of the segment. It's possible to use two
+                                 placeholders. The second one will then be used for the total number of
+                                 segments. For example using " - part %2d / %2d" would result in a
+                                 suffix that would look like " - part 22 / 54".
+                                 See printf(1) for more information on formatting.
+    --segment-suffix string      Use a specific segment filename suffix. Overrides --suffix
+    --title-suffix string        Use a specific title metadata string suffix. Overrides --suffix
+    --cover filename             Use provided file as the cover art instead of copying the cover art
+                                 (if any) of the source file
+    --no-coverart                Do not copy cover art from the source file to the segments
+    --no-copy-metadata           Do not copy over metadata from the source file to the segments
+    
+    The following options can be used to provide or override values for specific metadata fields:
+    --meta-title string
+    --meta-artist string
+    --meta-album string
+    --meta-genre string
+    --meta-publisher string
+    --meta-comment string
+    These settings override the metadata values provided (if any) by the source file.
