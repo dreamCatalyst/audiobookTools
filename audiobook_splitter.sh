@@ -416,7 +416,12 @@ for SEGMENT in $(seq 1 $NUM_SEGMENTS); do
     ESCAPED_SEGMENT_FILENAME=$(printf '%q' "$SEGMENT_FILENAME")
     
     #FFMPEG_CMD+="$ESCAPED_SEGMENT_FILENAME"
-    FFMPEG_CMD+="\"$SEGMENT_FILENAME\""
+    if [ -n $OUTPUT_DIRECTORY ]; then
+        FFMPEG_CMD+="\"$OUTPUT_DIRECTORY/$SEGMENT_FILENAME\""
+    else
+        FFMPEG_CMD+="\"$SEGMENT_FILENAME\""
+    fi
+    
     print_debug "constructed command: '$FFMPEG_CMD'"
     eval $FFMPEG_CMD
 done
