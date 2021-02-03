@@ -386,11 +386,34 @@ for SEGMENT in $(seq 1 $NUM_SEGMENTS); do
     if [ !$COPY_METADATA ]; then
         FFMPEG_CMD+="-map_metadata -1 "
     fi
-    # set metadata for coverart
+    # set metadata for coverart # TODO check if there is any coverart present in source file
     if [ -n "$COVERART_FILE" ] || $COPY_COVERART; then
         FFMPEG_CMD+="-metadata:s:v title=\"Album cover\" -metadata:s:v comment=\"Cover (front)\" "
     fi
-    # TODO: set the metadata fields
+    
+    # We always set the metadata title
+    META_TITLE=""
+    if [ ! -z "${METADATA[TITLE]}" ]; then
+        META_TITLE="${METADATA[TITLE]}"
+    elif [ -n "$TITLE_PREFIX" ]; then
+        META_TITLE="$TITLE_PREFIX"
+    elif [ -n "$PREFIX_STRING" ]; then
+        META_TITLE="$PREFIX_STRING"
+    else
+        META_TITLE="$SOURCE_FILE_NO_EXT"
+    fi
+    
+    if [ -n "$TITLE_SUFFIX" ]; then
+        META_TITLE+="$TITLE_SUFFIX"
+    else  # SUFFIX_STRING is always set
+        META_TITLE+="$SUFFIX_STRING"
+    fi
+    
+    META_TITLE=$(echo "$META_TITLE" | awk "{ printf \$0, $SEGMENT, $NUM_SEGMENTS }")
+    FFMPEG_CMD+="-metadata title=\"$META_TITLE\" "
+    
+    # Set the remaining optional metadata fields
+    
     
     # set codec and bitrate
     FFMPEG_CMD+="-acodec $CODEC -b:a $BITRATE "
