@@ -379,9 +379,9 @@ for SEGMENT in $(seq 1 $NUM_SEGMENTS); do
     #FFMPEG_CMD+="-i \"$ESCAPED_INPUT_FILENAME\" "
     FFMPEG_CMD+="-i \"$INPUTFILENAME\" "
     if [ -n "$COVERART_FILE" ]; then
-        FFMPEG_CMD+="-i \"$COVERART_FILE\" -map 0 -map -0:v? "
+        FFMPEG_CMD+="-i \"$COVERART_FILE\" -map 0:a -map -0:v? "
     elif [ !$COPY_COVERART ]; then
-        FFMPEG_CMD+="-map 0 -map -0:v? "
+        FFMPEG_CMD+="-map 0:a -map -0:v? "
     fi
     if [ !$COPY_METADATA ]; then
         FFMPEG_CMD+="-map_metadata -1 "
