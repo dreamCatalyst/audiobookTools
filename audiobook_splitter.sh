@@ -384,7 +384,7 @@ for SEGMENT in $(seq 1 $NUM_SEGMENTS); do
         FFMPEG_CMD+="-map 0:a -map -0:v? "
     fi
     if [ !$COPY_METADATA ]; then
-        FFMPEG_CMD+="-map_metadata -1 "
+        FFMPEG_CMD+="-map_metadata -1 -map_chapters -1"
     fi
     # set metadata for coverart # TODO check if there is any coverart present in source file
     if [ -n "$COVERART_FILE" ] || $COPY_COVERART; then
