@@ -439,7 +439,7 @@ for SEGMENT in $(seq 1 $NUM_SEGMENTS); do
     ESCAPED_SEGMENT_FILENAME=$(printf '%q' "$SEGMENT_FILENAME")
     
     #FFMPEG_CMD+="$ESCAPED_SEGMENT_FILENAME"
-    if [ -n $OUTPUT_DIRECTORY ]; then
+    if [ -n "$OUTPUT_DIRECTORY" ]; then
         FFMPEG_CMD+="\"$OUTPUT_DIRECTORY/$SEGMENT_FILENAME\""
     else
         FFMPEG_CMD+="\"$SEGMENT_FILENAME\""
